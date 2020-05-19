@@ -41,3 +41,68 @@ class Mouse:
         WHEEL = 0x0800
         X_DOWN = 0x0080
         X_UP = 0x0100
+
+
+class _KeyboardInput(ctypes.Structure):
+    _fields_ = [("wVk", ctypes.c_ushort),
+                ("wScan", ctypes.c_ushort),
+                ("dwFlags", ctypes.c_ulong),
+                ("time", ctypes.c_ulong),
+                ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong))]
+
+
+class _HardwardInput(ctypes.Structure):
+    _fields_ = [("uMsg", ctypes.c_ulong),
+                ("wParamL", ctypes.c_short),
+                ("wParamH", ctypes.c_ushort)]
+
+
+class _MouseInput(ctypes.Structure):
+    _fields_ = [("dx", ctypes.c_long),
+                ("dy", ctypes.c_long),
+                ("mouseData", ctypes.c_ulong),
+                ("dwFlags", ctypes.c_ulong),
+                ("time", ctypes.c_ulong),
+                ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong))]
+
+
+class _InputType(ctypes.Union):
+    _fields_ = [("ki", _KeyboardInput),
+                ("mi", _MouseInput),
+                ("hi", _HardwardInput)]
+
+
+class _Input(ctypes.Structure):
+    _fields_ = [("type", ctypes.c_ulong),
+                ("ii", _InputType)]
+
+
+class Keyboard:
+
+    class Key:
+        N1 = 0x02
+        W = 0x11
+        A = 0x1E
+        S = 0x1F
+        D = 0x20
+
+    @staticmethod
+    def click(key_code):
+        Keyboard.press(key_code)
+        Keyboard.release(key_code)
+
+    @staticmethod
+    def press(key_code):
+        extra = ctypes.c_ulong(0)
+        input_type = _InputType()
+        input_type.ki = _KeyboardInput(0, key_code, 0x0008, 0, ctypes.pointer(extra))
+        key = _Input(ctypes.c_ulong(1), input_type)
+        ctypes.windll.user32.SendInput(1, ctypes.pointer(key), ctypes.sizeof(key))
+
+    @staticmethod
+    def release(key_code):
+        extra = ctypes.c_ulong(0)
+        input_type = _InputType()
+        input_type.ki = _KeyboardInput(0, key_code, 0x0008 | 0x0002, 0, ctypes.pointer(extra))
+        key = _Input(ctypes.c_ulong(1), input_type)
+        ctypes.windll.user32.SendInput(1, ctypes.pointer(key), ctypes.sizeof(key))
