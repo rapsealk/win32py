@@ -4,7 +4,7 @@ import sys
 import ctypes
 import PIL.ImageGrab
 
-import win32py.windows
+from . import windows
 
 if sys.platform != 'win32':
     import platform
@@ -22,7 +22,14 @@ class Mouse:
 
     @staticmethod
     def move(x, y):
-        ctypes.windll.user32.SetCursorPos(x, y)
+        # ctypes.windll.user32.SetCursorPos(x, y)
+        x = 1 + int(x * 65536 / 1920)
+        y = 1 + int(y * 65536 / 1080)
+        extra = ctypes.c_ulong(0)
+        input_type = _InputType()
+        input_type.mi = _MouseInput(x, y, 0, 0x0001 | 0x8000, 0, ctypes.pointer(extra))
+        command = _Input(ctypes.c_ulong(0), input_type)
+        ctypes.windll.user32.SendInput(1, ctypes.pointer(command), ctypes.sizeof(command))
 
     @staticmethod
     def click(event):
@@ -112,7 +119,4 @@ class Keyboard:
 
 def get_foreground_window_title():
     titles = windows.get_window_titles()
-    try:
-        return titles[1]
-    except IndexError:
-        return titles[0]
+    return titles[0]
