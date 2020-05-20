@@ -18,6 +18,8 @@ if __name__ == "__main__":
     image = np.array(image)
     print(image.shape)
 
+    print(win32py.get_foreground_window_title())
+
     # for i in range(108):
     #     win32py.Keyboard.press(0x00 + i)
     #     win32py.Keyboard.release(0x00 + i)

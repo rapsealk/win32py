@@ -4,6 +4,8 @@ import sys
 import ctypes
 import PIL.ImageGrab
 
+import win32py.windows
+
 if sys.platform != 'win32':
     import platform
     raise Exception('Invalid platform: %s (%s)' % (sys.platform, platform.platform()))
@@ -106,3 +108,11 @@ class Keyboard:
         input_type.ki = _KeyboardInput(0, key_code, 0x0008 | 0x0002, 0, ctypes.pointer(extra))
         key = _Input(ctypes.c_ulong(1), input_type)
         ctypes.windll.user32.SendInput(1, ctypes.pointer(key), ctypes.sizeof(key))
+
+
+def get_foreground_window_title():
+    titles = windows.get_window_titles()
+    try:
+        return titles[1]
+    except IndexError:
+        return titles[0]

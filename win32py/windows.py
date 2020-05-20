@@ -3,11 +3,11 @@
 import ctypes
 
 
-EnumWindows = ctypes.windll.user32.EnumWindows
-EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
 GetWindowText = ctypes.windll.user32.GetWindowTextW
 GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
 IsWindowVisible = ctypes.windll.user32.IsWindowVisible
+EnumWindows = ctypes.windll.user32.EnumWindows
+EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
 
 titles = []
 
@@ -21,6 +21,7 @@ def foreach_window(hwnd, lparam):
     return True
 
 
-EnumWindows(EnumWindowsProc(foreach_window), 0)
-
-print(titles)
+def get_window_titles():
+    titles.clear()
+    EnumWindows(EnumWindowsProc(foreach_window), 0)
+    return titles.copy()
