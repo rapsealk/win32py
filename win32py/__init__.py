@@ -35,6 +35,14 @@ class Mouse:
     def click(event):
         ctypes.windll.user32.mouse_event(event, 0, 0, 0, 0)
 
+    @staticmethod
+    def get_cursor_pos():
+        point = _Point()
+        if ctypes.windll.user32.GetCursorPos(ctypes.pointer(point)):
+            return (point.x, point.y)
+        else:
+            return (0, 0)
+
     class Event:
         """
         https://docs.microsoft.com/ko-kr/windows/win32/api/winuser/nf-winuser-mouse_event
@@ -86,6 +94,11 @@ class _Input(ctypes.Structure):
                 ("ii", _InputType)]
 
 
+class _Point(ctypes.Structure):
+    _fields_ = [("x", ctypes.c_ulong),
+                ("y", ctypes.c_ulong)]
+
+
 class Keyboard:
 
     class Key:
@@ -119,4 +132,4 @@ class Keyboard:
 
 def get_foreground_window_title():
     titles = windows.get_window_titles()
-    return titles[0]
+    return titles[1]    # titles[0]
