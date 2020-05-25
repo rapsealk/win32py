@@ -5,6 +5,7 @@ import ctypes
 import PIL.ImageGrab
 
 from . import windows
+from . import util
 
 if sys.platform != 'win32':
     import platform
@@ -132,4 +133,4 @@ class Keyboard:
 
 def get_foreground_window_title():
     titles = windows.get_window_titles()
-    return titles[1]    # titles[0]
+    return util.first(lambda x: x != '', titles)
