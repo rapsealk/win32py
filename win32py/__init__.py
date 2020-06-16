@@ -132,5 +132,8 @@ class Keyboard:
 
 
 def get_foreground_window_title():
-    titles = windows.get_window_titles()
-    return util.first(lambda x: x != '', titles)
+    lib = ctypes.windll.user32
+    handle = lib.GetForegroundWindow()
+    buffer = ctypes.create_unicode_buffer(255)
+    lib.GetWindowTextW(handle, buffer, ctypes.sizeof(buffer))
+    return buffer.value
