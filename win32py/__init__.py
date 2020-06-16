@@ -137,3 +137,18 @@ def get_foreground_window_title():
     buffer = ctypes.create_unicode_buffer(255)
     lib.GetWindowTextW(handle, buffer, ctypes.sizeof(buffer))
     return buffer.value
+
+
+class _Rect(ctypes.Structure):
+    _fields_ = [("left", ctypes.c_long),
+                ("top", ctypes.c_long),
+                ("right", ctypes.c_long),
+                ("bottom", ctypes.c_long)]
+
+
+def get_foreground_window_rect():
+    lib = ctypes.windll.user32
+    handle = lib.GetForegroundWindow()
+    rect = _Rect()
+    lib.GetWindowRect(handle. ctypes.pointer(rect))
+    return rect
