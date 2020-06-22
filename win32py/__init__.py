@@ -22,10 +22,10 @@ class Mouse:
         pass
 
     @staticmethod
-    def move(x, y):
+    def move(x, y, width=1280, height=720):
         # ctypes.windll.user32.SetCursorPos(x, y)
-        x = 1 + int(x * 65536 / 1920)
-        y = 1 + int(y * 65536 / 1080)
+        x = 1 + int(x * 65536 / width)
+        y = 1 + int(y * 65536 / height)
         extra = ctypes.c_ulong(0)
         input_type = _InputType()
         input_type.mi = _MouseInput(x, y, 0, 0x0001 | 0x8000, 0, ctypes.pointer(extra))
