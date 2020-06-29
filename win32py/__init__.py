@@ -150,5 +150,10 @@ def get_foreground_window_rect():
     lib = ctypes.windll.user32
     handle = lib.GetForegroundWindow()
     rect = _Rect()
-    lib.GetWindowRect(handle. ctypes.pointer(rect))
+    lib.GetWindowRect(handle, ctypes.pointer(rect))
     return rect
+
+
+def get_foreground_window_grab():
+    rect = get_foreground_window_rect()
+    return PIL.ImageGrab.grab(bbox=(rect.left, rect.top, rect.right, rect.bottom))
