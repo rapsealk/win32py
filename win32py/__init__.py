@@ -22,20 +22,27 @@ class Mouse:
         pass
 
     @staticmethod
-    def move(x, y, width=1280, height=720, x_offset=0, y_offset=0):
+    def move(x, y, width=1280, height=720, x_offset=0, y_offset=0, is_relative=False):
         # ctypes.windll.user32.SetCursorPos(x, y)
-        x = 1 + int((x+x_offset) * 65536 / width)
-        y = 1 + int((y+y_offset) * 65536 / height)
         extra = ctypes.c_ulong(0)
         input_type = _InputType()
-        input_type.mi = _MouseInput(x, y, 0, 0x0001 | 0x8000, 0, ctypes.pointer(extra))
+        dwFlags = Mouse.Event.MOVE
+        if is_relative:
+            x = x
+            y = y
+        else:
+            dwFlags |= Mouse.Event.ABSOLUTE
+            x = 1 + int((x+x_offset) * 65536 / width)
+            y = 1 + int((y+y_offset) * 65536 / height)
+        input_type.mi = _MouseInput(x, y, 0, dwFlags, 0, ctypes.pointer(extra))
         command = _Input(ctypes.c_ulong(0), input_type)
         ctypes.windll.user32.SendInput(1, ctypes.pointer(command), ctypes.sizeof(command))
 
     @staticmethod
     def move_on_foreground_window(x, y, width=1920, height=1080):
-        rect = get_foreground_window_rect()
-        Mouse.move(x+rect.left, y+rect.top, width=width, height=height)
+        #rect = get_foreground_window_rect()
+        #Mouse.move(x+rect.left, y+rect.top, width=width, height=height)
+        Mouse.move(x, y)
 
     @staticmethod
     def click(event):
