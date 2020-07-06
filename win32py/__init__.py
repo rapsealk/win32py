@@ -116,6 +116,8 @@ class Keyboard:
 
     class Key:
         N1 = 0x02
+        Q = 0x10
+        E = 0x12
         W = 0x11
         A = 0x1E
         S = 0x1F
