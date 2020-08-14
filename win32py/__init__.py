@@ -27,10 +27,7 @@ class Mouse:
         extra = ctypes.c_ulong(0)
         input_type = _InputType()
         dwFlags = Mouse.Event.MOVE
-        if is_relative:
-            x = x
-            y = y
-        else:
+        if not is_relative:
             dwFlags |= Mouse.Event.ABSOLUTE
             x = 1 + int((x+x_offset) * 65536 / width)
             y = 1 + int((y+y_offset) * 65536 / height)
@@ -110,6 +107,24 @@ class _Input(ctypes.Structure):
 class _Point(ctypes.Structure):
     _fields_ = [("x", ctypes.c_ulong),
                 ("y", ctypes.c_ulong)]
+
+
+class _MSLLHOOKSTRUCT(ctypes.Structure):
+    _fields_ = [("pt", _Point),
+                ("mouseData", ctypes.c_ulong),  # ctypes.wintypes.DWORD
+                ("flags", ctypes.c_ulong),
+                ("time", ctypes.c_ulong),
+                ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong))]
+
+
+"""
+class RAWINPUTDEVICE(ctypes.Structure):
+    from ctypes.wintypes import HWND
+    _fields_ = [("usUsagePage", ctypes.c_ushort),
+                ("usUsage", ctypes.c_ushort),
+                ("dwFlags", ctypes.c_ulong),    # == ctypes.wintypes.DWORD
+                ("hwndTarget", HWND)]
+"""
 
 
 class Keyboard:
