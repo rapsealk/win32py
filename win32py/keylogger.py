@@ -108,7 +108,6 @@ def k_hook_procedure(nCode, wParam, lParam):
     if CTRL_CODE == int(lparam):
         print("Ctrl pressed, call uninstallHook()")
         key_logger.uninstall_hook_procedure()
-        # mouse_hook.uninstall_hook_procedure()
         sys.exit(-1)
 
     try:
@@ -131,52 +130,6 @@ def save_key_log():
     path = os.path.join(os.path.dirname(__file__), 'key.log')
     with open(path, 'w', encoding='utf-8') as f:
         f.write(''.join(str(s) for s in keys))
-
-
-"""Mouse Logger
-class MouseHook:
-
-    def __init__(self):
-        self.hooked = None
-
-    def install_hook_procedure(self, pointer):
-        self.hooked = ctypes.windll.user32.SetWindowsHookExA(WH_MOUSE_LL,
-                                                             pointer,
-                                                             ctypes.windll.kernel32.GetModuleHandleW(None),
-                                                             0)
-        if not self.hooked:
-            return False
-        return True
-
-    def uninstall_hook_procedure(self):
-        if self.hooked is None:
-            return
-        ctypes.windll.user32.UnhookWindowsHookEx(self.hooked)
-        self.hooked = None
-
-
-def m_hook_procedure(nCode, wParam, lParam):    # LowLevelMouseProc
-    if wParam == WM_LBUTTONDOWN:
-        print('m_hook_procedure: LEFT')
-    if wParam == WM_RBUTTONDOWN:
-        print('m_hook_procedure: RIGHT')
-        print('Uninstall hook')
-        mouse_hook.uninstall_hook_procedure()
-        sys.exit(-1)
-    elif wParam != WM_MOUSEMOVE:
-    # if (wParam >> 32) != WM_MOUSEMOVE:
-        return ctypes.windll.user32.CallNextHookEx(mouse_hook.hooked, nCode, wParam, lParam)
-    print('[%s] m_hook_procedure:' % datetime.now().isoformat(), nCode, type(wParam), wParam, type(lParam), lParam)
-    try:
-        print('lParam.pointer.size:', ctypes.byref(lParam))
-        # point = ctypes.cast(lParam, ctypes.POINTER(_Point)).contents
-        point = ctypes.cast(lParam, ctypes.POINTER(_MSLLHOOKSTRUCT)).contents
-        print('point:', (point.pt.x, point.pt.y))
-        print('mouseData:', point.mouseData)
-    except Exception as e:
-        print('ee', e)
-    return ctypes.windll.user32.CallNextHookEx(mouse_hook.hooked, nCode, wParam, lParam)
-"""
 
 
 """
@@ -207,8 +160,3 @@ if __name__ == "__main__":
     #     print('Failed to register RawInputDevice!')
     #     sys.exit(-1)
     # pointer = get_function_pointer(m_hook_procedure_raw)
-
-    # mouse_hook = MouseHook()
-    # pointer = get_function_pointer(m_hook_procedure)
-    # if mouse_hook.install_hook_procedure(pointer):
-    #     print('installed mouse_hook')
