@@ -6,6 +6,8 @@ from ctypes.wintypes import MSG
 from multiprocessing import Queue
 from threading import Thread
 
+from util import get_function_pointer
+
 """
 # Mouse movement: https://docs.microsoft.com/en-us/windows/win32/dxtecharts/taking-advantage-of-high-dpi-mouse-movement
 HID_USAGE_PAGE_GENERIC = 0x01
@@ -52,14 +54,6 @@ WM_LBUTTONDOWN = 0x0201
 WM_RBUTTONDOWN = 0x0204
 
 
-def get_function_pointer(fn):
-    CMPFUNC = ctypes.CFUNCTYPE(ctypes.c_int,
-                               ctypes.c_int,
-                               ctypes.c_int,
-                               ctypes.POINTER(ctypes.c_void_p))
-    return CMPFUNC(fn)
-
-
 # Mouse Logger
 class MouseHook:
 
@@ -93,9 +87,9 @@ class MouseHook:
         elif wParam == WM_RBUTTONDOWN:
             print('m_hook_procedure: RIGHT')
             print('Uninstall hook')
-            mouse_hook.uninstall_hook_procedure()
+            self.uninstall_hook_procedure()
             sys.exit(-1)
-        return ctypes.windll.user32.CallNextHookEx(mouse_hook.hooked, nCode, wParam, lParam)
+        return ctypes.windll.user32.CallNextHookEx(self.hooked, nCode, wParam, lParam)
 
 
 def digest_queue(queue):
