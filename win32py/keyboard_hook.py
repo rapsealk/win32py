@@ -7,7 +7,7 @@ from ctypes.wintypes import MSG
 from multiprocessing import Queue
 from threading import Thread
 
-from util import get_function_pointer
+from .util import get_function_pointer
 
 # Windows Hook: https://docs.microsoft.com/ko-kr/windows/win32/api/winuser/nf-winuser-setwindowshookexa?redirectedfrom=MSDN
 WH_KEYBOARD_LL = 13
@@ -28,13 +28,17 @@ KEY_MAP = {
 
 
 class KeyboardHook:
-    def __init__(self, digest_fn=None):
+    def __init__(self, queue=None, digest_fn=None):
+        global key_hook
+
+        key_hook = self
+
         self.hooked = None
-        self.queue = Queue()
+        self.queue = queue or Queue()
 
         self.thread = None
         if digest_fn and callable(digest_fn):
-            self.thread = Thread(target=digest_queue, args=(self.queue,), daemon=True)  # noqa: E501
+            self.thread = Thread(target=digest_fn, args=(self.queue,), daemon=True)  # noqa: E501
             self.thread.start()
 
     def __del__(self):
@@ -42,12 +46,12 @@ class KeyboardHook:
         if self.thread:
             self.thread.join()
 
-    def install_hook_procedure(self, pointer):
+    def install_hook_procedure(self, pointer, dwThreadId=0):
         module_handle = ctypes.windll.kernel32.GetModuleHandleW(None)
         self.hooked = ctypes.windll.user32.SetWindowsHookExA(WH_KEYBOARD_LL,
                                                              pointer,
                                                              module_handle,
-                                                             0)
+                                                             dwThreadId)
         if not self.hooked:
             return False
         return True
@@ -62,31 +66,32 @@ class KeyboardHook:
         msg = MSG()
         ctypes.windll.user32.GetMessageA(ctypes.byref(msg), 0, 0, 0)
 
-    def hook_procedure(self, nCode, wParam, lParam):
-        if wParam is not WM_KEYDOWN:
-            return ctypes.windll.user32.CallNextHookEx(self.hooked,
-                                                       nCode,
-                                                       wParam,
-                                                       lParam)
-        lparam = (lParam[0] >> 32)  # and 0xFFFF
 
-        if CTRL_CODE == int(lparam):
-            print("Ctrl pressed, call uninstallHook()")
-            self.uninstall_hook_procedure()
-            sys.exit(-1)
-
-        try:
-            hooked_key = KEY_MAP[int(lparam)]
-        except KeyError:
-            return ctypes.windll.user32.CallNextHookEx(self.hooked,
-                                                       nCode,
-                                                       wParam,
-                                                       lParam)
-        self.queue.put((int(time.time() * 1000), hooked_key))
-        return ctypes.windll.user32.CallNextHookEx(self.hooked,
+def hook_procedure(nCode, wParam, lParam):
+    if wParam is not WM_KEYDOWN:
+        return ctypes.windll.user32.CallNextHookEx(key_hook.hooked,
                                                    nCode,
                                                    wParam,
                                                    lParam)
+    lparam = (lParam[0] >> 32)  # and 0xFFFF
+
+    if CTRL_CODE == int(lparam):
+        print("Ctrl pressed, call uninstallHook()")
+        key_hook.uninstall_hook_procedure()
+        sys.exit(-1)
+
+    try:
+        hooked_key = KEY_MAP[int(lparam)]
+    except KeyError:
+        return ctypes.windll.user32.CallNextHookEx(key_hook.hooked,
+                                                   nCode,
+                                                   wParam,
+                                                   lParam)
+    key_hook.queue.put((int(time.time() * 1000), hooked_key))
+    return ctypes.windll.user32.CallNextHookEx(key_hook.hooked,
+                                               nCode,
+                                               wParam,
+                                               lParam)
 
 
 def digest_queue(queue):
@@ -95,9 +100,16 @@ def digest_queue(queue):
         print('item:', item)
 
 
-if __name__ == "__main__":
-    key_hook = KeyboardHook(digest_fn=digest_queue)
-    pointer = get_function_pointer(key_hook.hook_procedure)
+def main():
+    # global key_hook
+
+    queue = Queue()
+    key_hook = KeyboardHook(queue, digest_fn=digest_queue)
+    pointer = get_function_pointer(hook_procedure)
     if key_hook.install_hook_procedure(pointer):
         print("installed keyLogger")
     key_hook.run()
+
+
+if __name__ == "__main__":
+    main()
