@@ -7,7 +7,7 @@ from ctypes.wintypes import MSG
 from multiprocessing import Queue
 from threading import Thread
 
-from .util import get_function_pointer
+from util import get_function_pointer
 
 # Windows Hook: https://docs.microsoft.com/ko-kr/windows/win32/api/winuser/nf-winuser-setwindowshookexa?redirectedfrom=MSDN
 WH_KEYBOARD_LL = 13
@@ -24,6 +24,7 @@ KEY_MAP = {
     29: 'Ctrl',
     30: 'a', 31: 's', 32: 'd', 33: 'f', 34: 'g',
     35: 'h', 36: 'j', 37: 'k', 38: 'l',
+    42: 'Shift',
     44: 'z', 45: 'x', 46: 'c', 47: 'v', 48: 'b',
     49: 'n', 50: 'm',
     57: 'Space', 59: 'F1'
@@ -85,6 +86,7 @@ def hook_procedure(nCode, wParam, lParam):
         key_hook.uninstall_hook_procedure()
         sys.exit(-1)
 
+    """
     try:
         hooked_key = KEY_MAP[int(lparam)]
     except KeyError:
@@ -92,8 +94,10 @@ def hook_procedure(nCode, wParam, lParam):
                                                    nCode,
                                                    wParam,
                                                    lParam)
-    if hooked_key in TARGET_KEYS:
-        key_hook.queue.put((int(time.time() * 1000), hooked_key))
+    """
+
+    # if hooked_key in TARGET_KEYS:
+    key_hook.queue.put((int(time.time() * 1000), lparam))
     return ctypes.windll.user32.CallNextHookEx(key_hook.hooked,
                                                nCode,
                                                wParam,

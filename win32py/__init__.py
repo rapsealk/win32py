@@ -138,6 +138,9 @@ class Keyboard:
         A = 0x1E
         S = 0x1F
         D = 0x20
+        R = 0x13
+        SHIFT = 0x2A
+        SPACE = 0x39
 
     @staticmethod
     def click(key_code):
