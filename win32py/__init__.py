@@ -40,7 +40,7 @@ class Mouse:
     def move_on_foreground_window(x, y, width=1920, height=1080):
         #rect = get_foreground_window_rect()
         #Mouse.move(x+rect.left, y+rect.top, width=width, height=height)
-        Mouse.move(x, y)
+        Mouse.move(x, y, width, height)
 
     @staticmethod
     def click(event):
