@@ -4,9 +4,9 @@ import sys
 import ctypes
 import PIL.ImageGrab
 
-from . import windows
-from . import util
-from .keyboard_hook import KeyboardHook
+# from . import windows
+# from . import util
+# from .keyboard_hook import KeyboardHook
 
 if sys.platform != 'win32':
     import platform

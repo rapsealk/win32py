@@ -7,7 +7,7 @@ from ctypes.wintypes import MSG
 from multiprocessing import Queue
 from threading import Thread
 
-from util import get_function_pointer
+from .util import get_function_pointer
 
 # Windows Hook: https://docs.microsoft.com/ko-kr/windows/win32/api/winuser/nf-winuser-setwindowshookexa?redirectedfrom=MSDN
 WH_KEYBOARD_LL = 13
