@@ -47,6 +47,11 @@ class Mouse:
         ctypes.windll.user32.mouse_event(event, 0, 0, 0, 0)
 
     @staticmethod
+    def perform_click():
+        Mouse.click(0x0002)
+        Mouse.click(0x0004)
+
+    @staticmethod
     def get_cursor_pos():
         point = _Point()
         if ctypes.windll.user32.GetCursorPos(ctypes.pointer(point)):
