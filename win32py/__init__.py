@@ -38,9 +38,9 @@ class Mouse:
 
     @staticmethod
     def move_on_foreground_window(x, y, width=1920, height=1080):
-        #rect = get_foreground_window_rect()
-        #Mouse.move(x+rect.left, y+rect.top, width=width, height=height)
-        Mouse.move(x, y, width, height)
+        rect = get_foreground_window_rect()
+        Mouse.move(x+rect.left, y+rect.top, width=width, height=height)
+        # Mouse.move(x, y, width, height)
 
     @staticmethod
     def click(event):
@@ -193,5 +193,6 @@ def get_foreground_window_rect():
 
 
 def get_foreground_window_grab():
+    """Set Display Resolution to 1920x1080 and Size to 100%."""
     rect = get_foreground_window_rect()
     return PIL.ImageGrab.grab(bbox=(rect.left, rect.top, rect.right, rect.bottom))
