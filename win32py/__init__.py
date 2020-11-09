@@ -37,9 +37,9 @@ class Mouse:
         ctypes.windll.user32.SendInput(1, ctypes.pointer(command), ctypes.sizeof(command))
 
     @staticmethod
-    def move_on_foreground_window(x, y, width=1920, height=1080):
+    def move_on_foreground_window(x, y, width=1920, height=1080, is_relative=False):
         rect = get_foreground_window_rect()
-        Mouse.move(x+rect.left, y+rect.top, width=width, height=height)
+        Mouse.move(x+rect.left, y+rect.top, width=width, height=height, is_relative=is_relative)
         # Mouse.move(x, y, width, height)
 
     @staticmethod
